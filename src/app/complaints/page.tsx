@@ -1,6 +1,6 @@
 import {
 	type ComplaintFilter as ComplaintFilterType,
-	getLatestComplaints,
+	getComplaints,
 } from "@/actions/complaint";
 import { auth } from "@/auth";
 import Complaint from "@/components/complaint";
@@ -14,10 +14,9 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 
-export default async function Home({
+export default async function ComplaintsPage({
 	searchParams,
 }: {
 	searchParams: {
@@ -25,17 +24,16 @@ export default async function Home({
 	};
 }) {
 	const params = new URLSearchParams(searchParams);
-
 	const session = await auth();
 
-	const complaints = await getLatestComplaints(
+	const complaints = await getComplaints(
 		(params.get("filter") as ComplaintFilterType) ?? "all",
 	);
 
 	return (
 		<main className="max-w-6xl mx-auto py-8">
 			<header className="flex flex-row justify-between items-center mb-4">
-				<h2 className="text-2xl font-medium">Quejas recientes</h2>
+				<h2 className="text-2xl font-medium">Quejas</h2>
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild className="inline-block md:hidden">
 						<Button variant="outline" size="icon">
@@ -47,11 +45,6 @@ export default async function Home({
 							<ComplaintFilter />
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem>
-							<Link href="/complaints" className="w-full h-full">
-								Ver todas
-							</Link>
-						</DropdownMenuItem>
 						{session && (
 							<DropdownMenuItem>
 								<Link href="/complaints/upload" className="w-full h-full">
@@ -62,15 +55,6 @@ export default async function Home({
 					</DropdownMenuContent>
 				</DropdownMenu>
 				<div className="hidden md:flex flex-row gap-x-4 items-end">
-					<Link
-						href="/complaints"
-						className={buttonVariants({
-							variant: "link",
-						})}
-					>
-						{" "}
-						Ver todas{" "}
-					</Link>
 					<ComplaintFilter />
 					{session && (
 						<Link

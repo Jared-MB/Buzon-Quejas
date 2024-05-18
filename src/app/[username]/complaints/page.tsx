@@ -1,6 +1,6 @@
 import {
 	type ComplaintFilter as ComplaintFilterType,
-	getLatestComplaints,
+	getComplaintsByUser,
 } from "@/actions/complaint";
 import { auth } from "@/auth";
 import Complaint from "@/components/complaint";
@@ -13,29 +13,49 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getUserByEmail } from "@/db/queries/user.query";
 import { MoreVertical } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default async function Home({
+export default async function UsernameComplaintsPage({
+	params,
 	searchParams,
 }: {
+	params: {
+		username: string;
+	};
 	searchParams: {
 		filter: ComplaintFilterType;
 	};
 }) {
-	const params = new URLSearchParams(searchParams);
-
 	const session = await auth();
 
-	const complaints = await getLatestComplaints(
-		(params.get("filter") as ComplaintFilterType) ?? "all",
+	if (!session || !session.user) {
+		redirect("/login");
+	}
+
+	const user = await getUserByEmail(session.user.email ?? "");
+
+	if (!user) {
+		redirect("/");
+	}
+
+	if (params.username !== user.username) {
+		redirect("/");
+	}
+
+	const searchParamsFilter = new URLSearchParams(searchParams);
+
+	const complaints = await getComplaintsByUser(
+		user._id,
+		(searchParamsFilter.get("filter") as ComplaintFilterType) ?? "all",
 	);
 
 	return (
 		<main className="max-w-6xl mx-auto py-8">
 			<header className="flex flex-row justify-between items-center mb-4">
-				<h2 className="text-2xl font-medium">Quejas recientes</h2>
+				<h2 className="text-2xl font-medium">Mis quejas</h2>
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild className="inline-block md:hidden">
 						<Button variant="outline" size="icon">
@@ -47,11 +67,6 @@ export default async function Home({
 							<ComplaintFilter />
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem>
-							<Link href="/complaints" className="w-full h-full">
-								Ver todas
-							</Link>
-						</DropdownMenuItem>
 						{session && (
 							<DropdownMenuItem>
 								<Link href="/complaints/upload" className="w-full h-full">
@@ -62,26 +77,15 @@ export default async function Home({
 					</DropdownMenuContent>
 				</DropdownMenu>
 				<div className="hidden md:flex flex-row gap-x-4 items-end">
+					<ComplaintFilter />
 					<Link
-						href="/complaints"
+						href="/complaints/upload"
 						className={buttonVariants({
-							variant: "link",
+							variant: "default",
 						})}
 					>
-						{" "}
-						Ver todas{" "}
+						Hacer una queja
 					</Link>
-					<ComplaintFilter />
-					{session && (
-						<Link
-							href="/complaints/upload"
-							className={buttonVariants({
-								variant: "default",
-							})}
-						>
-							Hacer una queja
-						</Link>
-					)}
 				</div>
 			</header>
 			<div className="flex flex-col gap-y-4">
