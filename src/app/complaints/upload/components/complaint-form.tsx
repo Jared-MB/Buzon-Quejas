@@ -19,7 +19,6 @@ export default function ComplaintForm({ user }: { user: User }) {
 
 	return (
 		<form action={dispatch}>
-			{JSON.stringify(errors)}
 			<CardHeader>
 				<h2 className="text-3xl font-medium flex flex-row gap-x-2 items-center">
 					Hacer una queja

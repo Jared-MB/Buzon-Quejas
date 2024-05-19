@@ -21,6 +21,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getUserByEmail } from "@/db/queries/user.query";
 import Autoplay from "embla-carousel-autoplay";
 import { MoreVertical } from "lucide-react";
 import Image from "next/image";
@@ -36,6 +37,15 @@ export default async function Home({
 	const params = new URLSearchParams(searchParams);
 
 	const session = await auth();
+
+	let userId = "";
+
+	if (session?.user) {
+		const user = await getUserByEmail(session.user.email ?? "");
+		if (user) {
+			userId = user._id;
+		}
+	}
 
 	const complaints = await getLatestComplaints(
 		(params.get("filter") as ComplaintFilterType) ?? "all",
@@ -112,7 +122,12 @@ export default async function Home({
 				</header>
 				<div className="flex flex-col gap-y-4">
 					{complaints.map((complaint) => (
-						<Complaint complaint={complaint} key={complaint._id} />
+						<Complaint
+							complaint={complaint}
+							key={complaint._id}
+							showReply={complaint.userId !== userId}
+							hasSession={!!session}
+						/>
 					))}
 				</div>
 			</section>

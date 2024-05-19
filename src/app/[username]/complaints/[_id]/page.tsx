@@ -1,9 +1,10 @@
 import { getComplaintByID } from "@/actions/complaint";
 import { getRepliesByComplaintID } from "@/actions/reply";
-import { auth } from "@/auth";
 import Complaint from "@/components/complaint";
 import Reply from "@/components/reply";
-import { getUserByEmail } from "@/db/queries/user.query";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import SolveComplaint from "./components/solve-complaint";
 
 export default async function ComplaintPage({
 	params,
@@ -12,17 +13,6 @@ export default async function ComplaintPage({
 		_id: string;
 	};
 }) {
-	const session = await auth();
-
-	let userId = "";
-
-	if (session?.user) {
-		const user = await getUserByEmail(session.user.email ?? "");
-		if (user) {
-			userId = user._id;
-		}
-	}
-
 	const complaint = await getComplaintByID(params._id);
 	const replies = await getRepliesByComplaintID(params._id);
 
@@ -31,24 +21,27 @@ export default async function ComplaintPage({
 	}
 
 	return (
-		<main className="py-8 grid grid-cols-[1px_1fr] gap-x-4">
-			<div className="border border-zinc-300 h-full w-full rounded-md" />
+		<aside className="w-full grid grid-cols-[1fr_1px] gap-x-4">
 			<div className="flex flex-col gap-y-8">
-				<Complaint
-					complaint={complaint}
-					showMore={false}
-					hasSession={!!session}
-					showReply={complaint.userId !== userId}
-				/>
+				<Complaint complaint={complaint} showMore={false} showReply={false} />
 				{replies.map((reply) => (
 					<Reply
 						key={reply._id}
 						reply={reply}
 						complaintName={complaint.title}
-						username={(reply as any).user}
+						username={complaint.user}
 					/>
 				))}
+				<footer
+					className={cn(
+						"flex w-full justify-end",
+						complaint.status === "RESOLVED" && "hidden",
+					)}
+				>
+					<SolveComplaint />
+				</footer>
 			</div>
-		</main>
+			<div className="border border-zinc-300 h-full w-full rounded-md" />
+		</aside>
 	);
 }

@@ -12,7 +12,7 @@ export function Card({
 	return (
 		<section
 			className={cn(
-				"flex flex-col border border-zinc-300 rounded relative",
+				"flex flex-col border border-zinc-300 rounded relative h-fit",
 				{
 					"border-destructive": variant === "destructive",
 				},

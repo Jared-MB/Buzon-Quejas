@@ -73,8 +73,8 @@ export const complaints = pgTable("complaints", {
 	}).notNull(),
 	status: statusEnum("status").notNull().default("PENDING"),
 	userId: uuid("user_id").notNull(),
-	createdAt: timestamp("created_at").notNull().defaultNow(),
-	updatedAt: timestamp("update_at").notNull().defaultNow(),
+	createdAt: timestamp("created_at").notNull(),
+	updatedAt: timestamp("update_at").notNull(),
 	at: timestamp("at"),
 	location: varchar("location", {
 		length: 256,
@@ -111,6 +111,18 @@ export const replies = pgTable("replies", {
 		length: 512,
 	}).notNull(),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
+	isAnonymous: boolean("is_anonymous").notNull().default(true),
+});
+
+export type Reply = typeof replies.$inferSelect;
+export type InsertReply = typeof replies.$inferInsert;
+
+export const insertReplySchema = createInsertSchema(replies, {
+	_id: z.string().uuid(),
+	complaintId: z.string().uuid(),
+	userId: z.string().uuid(),
+	description: z.string().min(3).max(512),
+	isAnonymous: z.boolean(),
 });
 
 export const repliesRelations = relations(replies, ({ one }) => ({

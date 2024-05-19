@@ -3,7 +3,12 @@
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { insertComplaintDB } from "@/db/queries/complaint.query";
-import { complaints, insertComplaintSchema } from "@/db/schemas";
+import {
+	type Complaint,
+	complaints,
+	insertComplaintSchema,
+	users,
+} from "@/db/schemas";
 import { and, desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -14,16 +19,35 @@ export const getComplaintsByUser = async (
 	userId: string,
 	filter: ComplaintFilter = "all",
 ) => {
+	const user = (
+		await db
+			.select({ username: users.username })
+			.from(users)
+			.where(eq(users._id, userId))
+	)[0];
+
+	if (!user) {
+		return [];
+	}
+
 	if (filter === "all") {
-		return await db
+		const queryComplaints = await db
 			.select()
 			.from(complaints)
 			.where(eq(complaints.userId, userId));
+		return queryComplaints.map((complaint) => ({
+			...complaint,
+			user: !complaint.isAnonymous && user.username,
+		}));
 	}
-	return await db
+	const queryComplaints = await db
 		.select()
 		.from(complaints)
 		.where(and(eq(complaints.userId, userId), eq(complaints.status, filter)));
+	return queryComplaints.map((complaint) => ({
+		...complaint,
+		user: !complaint.isAnonymous && user.username,
+	}));
 };
 
 export const getComplaintByID = async (_id: string) => {
@@ -31,43 +55,120 @@ export const getComplaintByID = async (_id: string) => {
 		.select()
 		.from(complaints)
 		.where(eq(complaints._id, _id));
-	const complaint = queryComplaints[0];
+	const complaint = queryComplaints[0] as Complaint & { user?: string };
 	if (!complaint) {
 		return null;
 	}
+
+	if (!complaint.isAnonymous) {
+		const user = (
+			await db
+				.select({ username: users.username })
+				.from(users)
+				.where(eq(users._id, complaint.userId))
+		)[0];
+		complaint.user = user.username;
+	}
+
 	return complaint;
 };
 
 export const getLatestComplaints = async (filter: ComplaintFilter = "all") => {
 	if (filter === "all") {
-		return await db
+		const queryComplaints = await db
 			.select()
 			.from(complaints)
 			.limit(5)
 			.orderBy(desc(complaints.createdAt));
+
+		const queryComplaintsWithUser = queryComplaints.map(async (complaint) => {
+			if (!complaint.isAnonymous) {
+				const user = (
+					await db
+						.select({ username: users.username })
+						.from(users)
+						.where(eq(users._id, complaint.userId))
+				)[0];
+				return {
+					...complaint,
+					user: user.username,
+				};
+			}
+			return complaint;
+		});
+		return await Promise.all(queryComplaintsWithUser);
 	}
-	return await db
+	const queryComplaints = await db
 		.select()
 		.from(complaints)
 		.where(eq(complaints.status, filter))
 		.limit(5)
 		.orderBy(desc(complaints.createdAt));
+	const queryComplaintsWithUser = queryComplaints.map(async (complaint) => {
+		if (!complaint.isAnonymous) {
+			const user = (
+				await db
+					.select({ username: users.username })
+					.from(users)
+					.where(eq(users._id, complaint.userId))
+			)[0];
+			return {
+				...complaint,
+				user: user.username,
+			};
+		}
+		return complaint;
+	});
+	return await Promise.all(queryComplaintsWithUser);
 };
 
 export const getComplaints = async (filter: ComplaintFilter = "all") => {
 	if (filter === "all") {
-		return await db
+		const queryComplaints = await db
 			.select()
 			.from(complaints)
 			.limit(10)
 			.orderBy(desc(complaints.createdAt));
+
+		const queryComplaintsWithUser = queryComplaints.map(async (complaint) => {
+			if (!complaint.isAnonymous) {
+				const user = (
+					await db
+						.select({ username: users.username })
+						.from(users)
+						.where(eq(users._id, complaint.userId))
+				)[0];
+				return {
+					...complaint,
+					user: user.username,
+				};
+			}
+			return complaint;
+		});
+		return await Promise.all(queryComplaintsWithUser);
 	}
-	return await db
+	const queryComplaints = await db
 		.select()
 		.from(complaints)
-		.limit(10)
 		.where(eq(complaints.status, filter))
+		.limit(10)
 		.orderBy(desc(complaints.createdAt));
+	const queryComplaintsWithUser = queryComplaints.map(async (complaint) => {
+		if (!complaint.isAnonymous) {
+			const user = (
+				await db
+					.select({ username: users.username })
+					.from(users)
+					.where(eq(users._id, complaint.userId))
+			)[0];
+			return {
+				...complaint,
+				user: user.username,
+			};
+		}
+		return complaint;
+	});
+	return await Promise.all(queryComplaintsWithUser);
 };
 
 export const insertComplaint = async (
@@ -79,6 +180,8 @@ export const insertComplaint = async (
 	const complaint = insertComplaintSchema.safeParse({
 		...data,
 		isAnonymous: data.isAnonymous === "on",
+		createdAt: new Date(),
+		updatedAt: new Date(),
 	});
 
 	if (!complaint.success) {
@@ -97,7 +200,7 @@ export const insertComplaint = async (
 	insertComplaintDB({
 		...complaint.data,
 		_id,
-		at: new Date(complaint.data.at ?? ""),
+		at: complaint.data.at ? new Date(complaint.data.at) : null,
 		createdAt: new Date(),
 		updatedAt: new Date(),
 	}).catch((error) => {
@@ -107,4 +210,37 @@ export const insertComplaint = async (
 
 	revalidatePath("/");
 	redirect("/");
+};
+
+export const markComplaintAsResolved = async (
+	_prevState: unknown,
+	data: FormData,
+) => {
+	const _id = data.get("_id")?.toString();
+	const username = data.get("username")?.toString();
+
+	if (!_id) {
+		return { error: ["Error updating complaint"] };
+	}
+
+	const complaint = await getComplaintByID(_id);
+
+	if (!complaint) {
+		return { error: ["Complaint not found"] };
+	}
+
+	if (complaint.status === "RESOLVED") {
+		return { error: ["Complaint already resolved"] };
+	}
+
+	const updatedComplaint = await db
+		.update(complaints)
+		.set({ status: "RESOLVED", updatedAt: new Date() })
+		.where(eq(complaints._id, _id));
+
+	if (!updatedComplaint) {
+		return { error: ["Error updating complaint"] };
+	}
+
+	revalidatePath(`/${username}/complaints/${_id}`);
 };

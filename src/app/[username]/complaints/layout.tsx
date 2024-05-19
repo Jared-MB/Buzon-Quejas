@@ -1,6 +1,6 @@
 import {
 	type ComplaintFilter as ComplaintFilterType,
-	getComplaints,
+	getComplaintsByUser,
 } from "@/actions/complaint";
 import { auth } from "@/auth";
 import Complaint from "@/components/complaint";
@@ -16,34 +16,48 @@ import {
 import { getUserByEmail } from "@/db/queries/user.query";
 import { MoreVertical } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default async function ComplaintsPage({
+export default async function UsernameComplaintsPage({
+	params,
 	searchParams,
+	children,
 }: {
+	params: {
+		username: string;
+	};
 	searchParams: {
 		filter: ComplaintFilterType;
 	};
+	children: React.ReactNode;
 }) {
-	const params = new URLSearchParams(searchParams);
 	const session = await auth();
 
-	let userId = "";
-
-	if (session?.user) {
-		const user = await getUserByEmail(session.user.email ?? "");
-		if (user) {
-			userId = user._id;
-		}
+	if (!session || !session.user) {
+		redirect("/login");
 	}
 
-	const complaints = await getComplaints(
-		(params.get("filter") as ComplaintFilterType) ?? "all",
+	const user = await getUserByEmail(session.user.email ?? "");
+
+	if (!user) {
+		redirect("/");
+	}
+
+	if (params.username !== user.username) {
+		redirect("/");
+	}
+
+	const searchParamsFilter = new URLSearchParams(searchParams);
+
+	const complaints = await getComplaintsByUser(
+		user._id,
+		(searchParamsFilter.get("filter") as ComplaintFilterType) ?? "all",
 	);
 
 	return (
 		<main className="max-w-6xl mx-auto py-8">
 			<header className="flex flex-row justify-between items-center mb-4">
-				<h2 className="text-2xl font-medium">Quejas</h2>
+				<h2 className="text-2xl font-medium">Mis quejas</h2>
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild className="inline-block md:hidden">
 						<Button variant="outline" size="icon">
@@ -55,20 +69,19 @@ export default async function ComplaintsPage({
 							<ComplaintFilter />
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem>
-							<Link
-								href={session ? "/complaints/upload" : "/login"}
-								className="w-full h-full"
-							>
-								Hacer una queja
-							</Link>
-						</DropdownMenuItem>
+						{session && (
+							<DropdownMenuItem>
+								<Link href="/complaints/upload" className="w-full h-full">
+									Hacer una queja
+								</Link>
+							</DropdownMenuItem>
+						)}
 					</DropdownMenuContent>
 				</DropdownMenu>
 				<div className="hidden md:flex flex-row gap-x-4 items-end">
 					<ComplaintFilter />
 					<Link
-						href={session ? "/complaints/upload" : "/login"}
+						href="/complaints/upload"
 						className={buttonVariants({
 							variant: "default",
 						})}
@@ -77,18 +90,19 @@ export default async function ComplaintsPage({
 					</Link>
 				</div>
 			</header>
-			<div className="flex flex-col gap-y-4">
-				{complaints.map((complaint) => (
-					<Complaint
-						complaint={complaint}
-						key={complaint._id}
-						hasSession={!!session}
-						showReply={
-							complaint.userId !== userId && complaint.status === "RESOLVED"
-						}
-					/>
-				))}
-			</div>
+			<section className="flex flex-row w-full gap-x-8">
+				<div className="flex flex-col gap-y-4 w-full">
+					{complaints.map((complaint) => (
+						<Complaint
+							complaint={complaint}
+							key={complaint._id}
+							toProfile={{ username: user.username }}
+							showReply={false}
+						/>
+					))}
+				</div>
+				{children}
+			</section>
 		</main>
 	);
 }
