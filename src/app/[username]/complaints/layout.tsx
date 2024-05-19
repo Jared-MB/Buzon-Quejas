@@ -18,17 +18,15 @@ import { MoreVertical } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-export default async function UsernameComplaintsPage({
+export default async function UsernameComplaintsLayout({
 	params,
-	searchParams,
+	// searchParams,
 	children,
 }: {
 	params: {
 		username: string;
 	};
-	searchParams: {
-		filter: ComplaintFilterType;
-	};
+	// searchParams: string;
 	children: React.ReactNode;
 }) {
 	const session = await auth();
@@ -47,11 +45,12 @@ export default async function UsernameComplaintsPage({
 		redirect("/");
 	}
 
-	const searchParamsFilter = new URLSearchParams(searchParams);
+	// const searchParamsFilter = new URLSearchParams(searchParams);
 
 	const complaints = await getComplaintsByUser(
 		user._id,
-		(searchParamsFilter.get("filter") as ComplaintFilterType) ?? "all",
+		// (searchParamsFilter.get("filter") as ComplaintFilterType) ??
+		"all",
 	);
 
 	return (
