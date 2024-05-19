@@ -45,27 +45,26 @@ export default async function ComplaintsPage({
 							<ComplaintFilter />
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
-						{session && (
-							<DropdownMenuItem>
-								<Link href="/complaints/upload" className="w-full h-full">
-									Hacer una queja
-								</Link>
-							</DropdownMenuItem>
-						)}
+						<DropdownMenuItem>
+							<Link
+								href={session ? "/complaints/upload" : "/login"}
+								className="w-full h-full"
+							>
+								Hacer una queja
+							</Link>
+						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 				<div className="hidden md:flex flex-row gap-x-4 items-end">
 					<ComplaintFilter />
-					{session && (
-						<Link
-							href="/complaints/upload"
-							className={buttonVariants({
-								variant: "default",
-							})}
-						>
-							Hacer una queja
-						</Link>
-					)}
+					<Link
+						href={session ? "/complaints/upload" : "/login"}
+						className={buttonVariants({
+							variant: "default",
+						})}
+					>
+						Hacer una queja
+					</Link>
 				</div>
 			</header>
 			<div className="flex flex-col gap-y-4">
