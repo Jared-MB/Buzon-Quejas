@@ -95,9 +95,27 @@ export const insertComplaintSchema = createInsertSchema(complaints, {
 export type Complaint = typeof complaints.$inferSelect;
 export type InsertComplaint = typeof complaints.$inferInsert;
 
-export const complaintsRelations = relations(complaints, ({ one }) => ({
+export const complaintsRelations = relations(complaints, ({ one, many }) => ({
 	user: one(users, {
 		fields: [complaints.userId],
 		references: [users._id],
+	}),
+	replies: many(replies),
+}));
+
+export const replies = pgTable("replies", {
+	_id: uuid("_id").primaryKey(),
+	complaintId: uuid("complaint_id").notNull(),
+	userId: uuid("user_id").notNull(),
+	description: varchar("description", {
+		length: 512,
+	}).notNull(),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const repliesRelations = relations(replies, ({ one }) => ({
+	complaint: one(complaints, {
+		fields: [replies.complaintId],
+		references: [complaints._id],
 	}),
 }));
