@@ -46,6 +46,7 @@ export default async function ComplaintPage({
 						reply={reply}
 						complaintName={complaint.title}
 						username={(reply as any).user}
+						isSolved={complaint.status === "RESOLVED"}
 					/>
 				))}
 			</div>

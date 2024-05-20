@@ -31,6 +31,7 @@ export default async function ComplaintPage({
 						reply={reply}
 						complaintName={complaint.title}
 						username={complaint.user}
+						isSolved={complaint.status === "RESOLVED"}
 					/>
 				))}
 				<footer

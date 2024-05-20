@@ -17,11 +17,13 @@ export default function Reply({
 	complaintName,
 	complaintId,
 	username,
+	isSolved = false,
 }: {
 	reply: ReplyType;
 	complaintName: string;
 	username?: string;
 	complaintId: string;
+	isSolved?: boolean;
 }) {
 	return (
 		<Card>
@@ -36,10 +38,11 @@ export default function Reply({
 			</CardBody>
 			<CardFooter className="justify-between">
 				<CardDescription>
-					Creado: {reply.createdAt.toLocaleTimeString()} del{" "}
-					{reply.createdAt.toDateString()}
+					Creado: {reply.createdAt.toLocaleString()}
 				</CardDescription>
-				<ReplyForm complaintId={complaintId} complaintName={complaintName} />
+				{!isSolved && (
+					<ReplyForm complaintId={complaintId} complaintName={complaintName} />
+				)}
 			</CardFooter>
 		</Card>
 	);

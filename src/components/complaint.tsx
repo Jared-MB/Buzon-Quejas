@@ -9,6 +9,7 @@ import {
 	CardDescription,
 	CardFooter,
 	CardHeader,
+	CardSubtitle,
 	CardTitle,
 } from "./ui/card";
 import Divider from "./ui/divider";
@@ -59,12 +60,19 @@ export default function Complaint({
 				</CardHeader>
 				<Divider />
 				<CardBody>
+					{complaint.location && (
+						<CardSubtitle>{complaint.location}</CardSubtitle>
+					)}
 					<p>{complaint.description}</p>
+					{complaint.at && (
+						<CardDescription>
+							Fecha: {complaint.at.toLocaleDateString()}
+						</CardDescription>
+					)}
 				</CardBody>
 				<CardFooter className="justify-between">
 					<CardDescription>
-						Última actualización: {complaint.updatedAt.toLocaleTimeString()} del{" "}
-						{complaint.updatedAt.toDateString()}
+						Última actualización: {complaint.updatedAt.toLocaleString()}
 					</CardDescription>
 					<div>
 						{!hasSession ||
