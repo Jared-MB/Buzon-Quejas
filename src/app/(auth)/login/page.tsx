@@ -1,11 +1,12 @@
 "use client";
 
 import { login } from "@/actions/auth";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { CardBody, CardFooter } from "@/components/ui/card";
 import { Input, InputContainer, InputError } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -39,6 +40,14 @@ export default function LoginPage() {
 				</InputContainer>
 			</CardBody>
 			<CardFooter className="justify-end">
+				<Link
+					href="/register"
+					className={buttonVariants({
+						variant: "link",
+					})}
+				>
+					Registrarse
+				</Link>
 				<SubmitButton />
 			</CardFooter>
 			{errors && !errors.email && toast(Object.entries(errors)[0][0])}
