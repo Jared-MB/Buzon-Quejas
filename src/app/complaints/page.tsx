@@ -83,9 +83,7 @@ export default async function ComplaintsPage({
 						complaint={complaint}
 						key={complaint._id}
 						hasSession={!!session}
-						showReply={
-							complaint.userId !== userId && complaint.status === "RESOLVED"
-						}
+						showReply={complaint.status === "RESOLVED"}
 					/>
 				))}
 			</div>

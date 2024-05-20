@@ -1,4 +1,7 @@
+"use client";
+
 import type { Reply as ReplyType } from "@/db/schemas";
+import ReplyForm from "./reply-form";
 import {
 	Card,
 	CardBody,
@@ -12,8 +15,14 @@ import Divider from "./ui/divider";
 export default function Reply({
 	reply,
 	complaintName,
+	complaintId,
 	username,
-}: { reply: ReplyType; complaintName: string; username?: string }) {
+}: {
+	reply: ReplyType;
+	complaintName: string;
+	username?: string;
+	complaintId: string;
+}) {
 	return (
 		<Card>
 			<CardHeader>
@@ -25,11 +34,12 @@ export default function Reply({
 			<CardBody>
 				<p className="text-pretty">{reply.description}</p>
 			</CardBody>
-			<CardFooter>
+			<CardFooter className="justify-between">
 				<CardDescription>
 					Creado: {reply.createdAt.toLocaleTimeString()} del{" "}
 					{reply.createdAt.toDateString()}
 				</CardDescription>
+				<ReplyForm complaintId={complaintId} complaintName={complaintName} />
 			</CardFooter>
 		</Card>
 	);

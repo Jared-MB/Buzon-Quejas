@@ -43,8 +43,6 @@ export default function Complaint({
 		return badgeVariant;
 	}, [complaint.status]);
 
-	const [isOpen, setIsOpen] = useState<boolean>(false);
-
 	const router = useRouter();
 
 	return (
@@ -69,21 +67,26 @@ export default function Complaint({
 						{complaint.updatedAt.toDateString()}
 					</CardDescription>
 					<div>
-						{complaint.status !== "RESOLVED" && showReply && (
-							<Button
-								variant="link"
-								onClick={() =>
-									hasSession ? setIsOpen(true) : router.push("/login")
-								}
-								// className={buttonVariants({
-								// 	variant: "link",
-								// })}
-								// href={`${
-								// 	toProfile.username ? `/${toProfile.username}/` : "/"
-								// }complaints/${complaint._id}?reply=true`}
-							>
-								Responder
-							</Button>
+						{!hasSession ||
+							(!showReply && (
+								<Button
+									variant="link"
+									onClick={() => router.push("/login")}
+									// className={buttonVariants({
+									// 	variant: "link",
+									// })}
+									// href={`${
+									// 	toProfile.username ? `/${toProfile.username}/` : "/"
+									// }complaints/${complaint._id}?reply=true`}
+								>
+									Responder
+								</Button>
+							))}
+						{hasSession && complaint.status !== "RESOLVED" && showReply && (
+							<ReplyForm
+								complaintId={complaint._id}
+								complaintName={complaint.title}
+							/>
 						)}
 						{showMore && (
 							<Link
@@ -101,12 +104,6 @@ export default function Complaint({
 					</div>
 				</CardFooter>
 			</Card>
-			<ReplyForm
-				isOpen={isOpen}
-				setIsOpen={setIsOpen}
-				complaintName={complaint.title}
-				complaintId={complaint._id}
-			/>
 		</>
 	);
 }

@@ -38,10 +38,10 @@ export default async function ComplaintPage({
 					complaint={complaint}
 					showMore={false}
 					hasSession={!!session}
-					showReply={complaint.userId !== userId}
 				/>
 				{replies.map((reply) => (
 					<Reply
+						complaintId={complaint._id}
 						key={reply._id}
 						reply={reply}
 						complaintName={complaint.title}

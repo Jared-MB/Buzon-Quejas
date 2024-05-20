@@ -10,7 +10,7 @@ type State = Record<string, any> | { errors: Record<string, string[]> };
 
 export default function useDialogForm(
 	action: Action,
-	initialState: State,
+	initialState: State | undefined,
 	{
 		entityName,
 		gender = "male",
@@ -19,7 +19,7 @@ export default function useDialogForm(
 		gender?: "male" | "female";
 	},
 ) {
-	const [state, formAction] = useFormState(action, initialState);
+	const [state, formAction] = useFormState(action, initialState ?? undefined);
 	const handleAction = (data: FormData) => {
 		const id = toast.loading("Cargando...");
 		setId(id);
@@ -32,8 +32,7 @@ export default function useDialogForm(
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
-		setOpen(false);
-		if ("errors" in state && state.errors) {
+		if (state && "errors" in state && state.errors) {
 			const errors = Object.entries(state.errors);
 			const typeOfError = typeof state.errors;
 			const errorMessage =
@@ -51,8 +50,9 @@ export default function useDialogForm(
 				{ id: id ?? "" },
 			);
 		}
-		setId(null);
-	}, [state]);
+		toast.dismiss(id ?? "");
+		setOpen(false);
+	}, [state, id]);
 
 	return {
 		modal: {

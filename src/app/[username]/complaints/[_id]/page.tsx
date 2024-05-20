@@ -23,9 +23,10 @@ export default async function ComplaintPage({
 	return (
 		<aside className="w-full grid grid-cols-[1fr_1px] gap-x-4">
 			<div className="flex flex-col gap-y-8">
-				<Complaint complaint={complaint} showMore={false} showReply={false} />
+				<Complaint complaint={complaint} showMore={false} />
 				{replies.map((reply) => (
 					<Reply
+						complaintId={complaint._id}
 						key={reply._id}
 						reply={reply}
 						complaintName={complaint.title}

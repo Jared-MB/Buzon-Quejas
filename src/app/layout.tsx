@@ -47,7 +47,7 @@ export default function RootLayout({
 					</div>
 					{children}
 				</div>
-				<Toaster />
+				<Toaster visibleToasts={1} />
 			</body>
 		</html>
 	);

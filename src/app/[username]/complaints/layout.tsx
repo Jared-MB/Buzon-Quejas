@@ -95,8 +95,8 @@ export default async function UsernameComplaintsLayout({
 						<Complaint
 							complaint={complaint}
 							key={complaint._id}
-							toProfile={{ username: user.username }}
 							showReply={false}
+							toProfile={{ username: user.username }}
 						/>
 					))}
 				</div>

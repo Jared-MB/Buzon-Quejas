@@ -125,7 +125,6 @@ export default async function Home({
 						<Complaint
 							complaint={complaint}
 							key={complaint._id}
-							showReply={complaint.userId !== userId}
 							hasSession={!!session}
 						/>
 					))}
