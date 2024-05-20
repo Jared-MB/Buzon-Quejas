@@ -6,7 +6,12 @@ import { CardBody, CardFooter, CardHeader } from "@/components/ui/card";
 import { CheckboxWithText } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import Divider from "@/components/ui/divider";
-import { Input, InputContainer, InputDescription } from "@/components/ui/input";
+import {
+	Input,
+	InputContainer,
+	InputDescription,
+	InputError,
+} from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { User } from "@/db/schemas";
@@ -48,28 +53,30 @@ export default function ComplaintForm({ user }: { user: User }) {
 				<InputContainer>
 					<Label>Queja</Label>
 					<Input name="title" placeholder="¿Qué pasó?" />
+					{errors?.title && <InputError>{errors.title}</InputError>}
 				</InputContainer>
 				<InputContainer>
 					<Label>Descripción</Label>
 					<Textarea
 						name="description"
-						placeholder="Cuentanos más sobre lo que pasó..."
+						placeholder="Cuéntanos más sobre lo que pasó..."
 						rows={4}
 					/>
+					{errors?.description && <InputError>{errors.description}</InputError>}
 				</InputContainer>
 				<InputContainer>
 					<Label>
 						Fecha <small>(opcional)</small>
 					</Label>
 					<DatePicker />
-					<InputDescription>Día en que ocurrio el incidente</InputDescription>
+					<InputDescription>Día en que ocurrió el incidente</InputDescription>
 				</InputContainer>
 				<InputContainer>
 					<Label>
 						Ubicación <small>(opcional)</small>
 					</Label>
 					<Input name="location" placeholder="Facultad de ..." />
-					<InputDescription>Lugar donde ocurrio el incidente</InputDescription>
+					<InputDescription>Lugar donde ocurrió el incidente</InputDescription>
 				</InputContainer>
 			</CardBody>
 			<CardFooter className="justify-end gap-x-4">

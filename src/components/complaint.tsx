@@ -75,21 +75,20 @@ export default function Complaint({
 						Última actualización: {complaint.updatedAt.toLocaleString()}
 					</CardDescription>
 					<div>
-						{!hasSession ||
-							(!showReply && (
-								<Button
-									variant="link"
-									onClick={() => router.push("/login")}
-									// className={buttonVariants({
-									// 	variant: "link",
-									// })}
-									// href={`${
-									// 	toProfile.username ? `/${toProfile.username}/` : "/"
-									// }complaints/${complaint._id}?reply=true`}
-								>
-									Responder
-								</Button>
-							))}
+						{(!hasSession || !showReply) && complaint.status !== "RESOLVED" && (
+							<Button
+								variant="link"
+								onClick={() => router.push("/login")}
+								// className={buttonVariants({
+								// 	variant: "link",
+								// })}
+								// href={`${
+								// 	toProfile.username ? `/${toProfile.username}/` : "/"
+								// }complaints/${complaint._id}?reply=true`}
+							>
+								Responder
+							</Button>
+						)}
 						{hasSession && complaint.status !== "RESOLVED" && showReply && (
 							<ReplyForm
 								complaintId={complaint._id}

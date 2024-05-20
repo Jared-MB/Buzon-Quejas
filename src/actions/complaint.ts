@@ -79,7 +79,7 @@ export const getLatestComplaints = async (filter: ComplaintFilter = "all") => {
 			.select()
 			.from(complaints)
 			.limit(5)
-			.orderBy(desc(complaints.createdAt));
+			.orderBy(desc(complaints.updatedAt));
 
 		const queryComplaintsWithUser = queryComplaints.map(async (complaint) => {
 			if (!complaint.isAnonymous) {
@@ -103,7 +103,7 @@ export const getLatestComplaints = async (filter: ComplaintFilter = "all") => {
 		.from(complaints)
 		.where(eq(complaints.status, filter))
 		.limit(5)
-		.orderBy(desc(complaints.createdAt));
+		.orderBy(desc(complaints.updatedAt));
 	const queryComplaintsWithUser = queryComplaints.map(async (complaint) => {
 		if (!complaint.isAnonymous) {
 			const user = (

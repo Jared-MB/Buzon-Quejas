@@ -73,7 +73,7 @@ export const insertReply = async (_prevState: unknown, payload: FormData) => {
 				errors[key] = value;
 			},
 		);
-		return errors;
+		return { errors };
 	}
 
 	const complaint = (

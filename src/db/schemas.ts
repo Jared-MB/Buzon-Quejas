@@ -25,12 +25,16 @@ export const users = pgTable("users", {
 	}).notNull(),
 	username: varchar("username", {
 		length: 32,
-	}).notNull(),
+	})
+		.notNull()
+		.unique(),
 	password: varchar("password").notNull(),
 	role: roleEnum("role").notNull().default("USER"),
 	email: varchar("email", {
 		length: 256,
-	}).notNull(),
+	})
+		.notNull()
+		.unique(),
 	matricula: varchar("matricula", {
 		length: 9,
 	}).notNull(),
@@ -41,14 +45,37 @@ export const users = pgTable("users", {
 
 export const insertUserSchema = createInsertSchema(users, {
 	_id: z.string().optional(),
-	name: z.string().min(3).max(256),
-	lastName: z.string().min(3).max(256),
-	phone: z.string().min(10).max(13),
-	username: z.string().min(3).max(32),
-	password: z.string().min(8),
-	email: z.string().email(),
-	matricula: z.string().min(9).max(9),
-	career: z.string().min(3).max(256),
+	name: z
+		.string()
+		.min(3, "El nombre debe contener al menos 3 caracteres")
+		.max(256),
+	lastName: z
+		.string()
+		.min(3, "Los apellidos deben contener al menos 3 caracteres")
+		.max(256),
+	phone: z
+		.string()
+		.min(10, "El número de teléfono debe tener al menos 10 dígitos")
+		.max(13, "El número de teléfono debe tener máximo 13 dígitos"),
+	username: z
+		.string()
+		.min(3, "El nombre de usuario debe contener al menos 3 caracteres")
+		.max(32),
+	password: z
+		.string()
+		.min(8, "La contraseña debe contener al menos 8 caracteres"),
+	email: z
+		.string()
+		.email("El correo no puede estar vacío y debe tener un formato válido")
+		.endsWith(".buap.mx", "El correo debe ser institucional"),
+	matricula: z
+		.string()
+		.min(9, "La matrícula debe contener 9 dígitos")
+		.max(9, "La matrícula debe contener 9 dígitos"),
+	career: z
+		.string()
+		.min(3, "El nombre de la carrera debe contener al menos 3 caracteres")
+		.max(256, "El nombre de la carrera debe contener máximo 256 caracteres"),
 });
 export type InsertUser = typeof users.$inferInsert;
 export type User = Omit<typeof users.$inferSelect, "password">;
@@ -84,8 +111,11 @@ export const complaints = pgTable("complaints", {
 
 export const insertComplaintSchema = createInsertSchema(complaints, {
 	_id: z.string().optional(),
-	title: z.string().min(3).max(256),
-	description: z.string().min(3).max(512),
+	title: z.string().min(3, "Este campo es necesario").max(256),
+	description: z
+		.string()
+		.min(3, "Por favor provea algo más de información")
+		.max(512),
 	userId: z.string().uuid(),
 	location: z.string().max(256).optional(),
 	at: z.string().optional(),
@@ -121,7 +151,10 @@ export const insertReplySchema = createInsertSchema(replies, {
 	_id: z.string().uuid(),
 	complaintId: z.string().uuid(),
 	userId: z.string().uuid(),
-	description: z.string().min(3).max(512),
+	description: z
+		.string()
+		.min(3, "La descripción debe contener al menos 3 caracteres")
+		.max(512),
 	isAnonymous: z.boolean(),
 });
 

@@ -16,9 +16,13 @@ export default function BreadcrumbNavigation() {
 
 	return (
 		<>
-			{path[path.length - 1] !== "" && <span>|</span>}
+			<span>|</span>
 			<Breadcrumb>
 				<BreadcrumbList>
+					<BreadcrumbItem>
+						<BreadcrumbLink href="/">Inicio</BreadcrumbLink>
+					</BreadcrumbItem>
+					{path[path.length - 1] !== "" && <BreadcrumbSeparator />}
 					{path.map((item, index) => {
 						if (item === "") {
 							return null;

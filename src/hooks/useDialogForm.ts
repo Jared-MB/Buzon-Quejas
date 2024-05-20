@@ -1,3 +1,4 @@
+import { Entities } from "@/constants/entities";
 import { useEffect, useState } from "react";
 import { useFormState } from "react-dom";
 import { toast } from "sonner";
@@ -37,21 +38,23 @@ export default function useDialogForm(
 			const typeOfError = typeof state.errors;
 			const errorMessage =
 				typeOfError === "object"
-					? `${errors[0][0]}: ${errors[0][1]}`
+					? `${(Entities as any)[errors[0][0]] ?? errors[0][0]}: ${
+							errors[0][1]
+						}`
 					: `Error al agregar ${
 							gender === "male" ? "el" : "la"
 						} ${entityName.toLowerCase()}`;
 			toast.error(errorMessage, { id: id ?? "" });
 			return;
 		}
-		if (id != null) {
+		if (!state && id) {
 			toast.success(
 				`${entityName} agregad${gender === "male" ? "o" : "a"} correctamente`,
 				{ id: id ?? "" },
 			);
+			toast.dismiss(id ?? "");
+			setOpen(false);
 		}
-		toast.dismiss(id ?? "");
-		setOpen(false);
 	}, [state, id]);
 
 	return {

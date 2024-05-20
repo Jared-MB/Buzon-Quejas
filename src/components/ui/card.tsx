@@ -61,7 +61,7 @@ export function CardBody({
 	className,
 }: { children: React.ReactNode; className?: string }) {
 	return (
-		<article className={cn("p-6 flex flex-col gap-y-3 md:gap-y-2", className)}>
+		<article className={cn("p-6 flex flex-col gap-y-3", className)}>
 			{children}
 		</article>
 	);
